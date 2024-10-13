@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Change directory to 'front'
-        working-directory: front # この行を追加して、`front`ディレクトリに移動
+      - name: Change directory to 'front' #追加
+        run: cd front #追加
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
