@@ -32,14 +32,17 @@ jobs:
           npm run test --if-present
 
       - name: Copy artifact for deployment job
-        run: |
+        run: | #cd frontを追加
+          cd front
           mkdir deploy
           cp -r ./.next/standalone/. ./deploy
           cp -r ./public ./deploy
           cp -r ./.next/static/. ./deploy/.next/static
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./deploy -r
+        run: |
+          cd front
+          zip release.zip ./deploy -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
