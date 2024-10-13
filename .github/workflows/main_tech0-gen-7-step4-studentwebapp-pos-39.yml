@@ -32,8 +32,7 @@ jobs:
           npm run test --if-present
 
       - name: Copy artifact for deployment job
-        run: | #cd frontを追加
-          cd front
+        run: |
           mkdir deploy
           cp -r ./.next/standalone/. ./deploy
           cp -r ./public ./deploy
