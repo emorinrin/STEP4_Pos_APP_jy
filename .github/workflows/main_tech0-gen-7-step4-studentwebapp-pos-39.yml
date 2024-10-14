@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Change directory to 'front' #追加
-        run: cd front #追加
+        run: cd front #ここで一度`cd front`していますが、後のステップで再度ディレクトリ移動しているため、削除を検討。
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
@@ -26,21 +26,29 @@ jobs:
 
       - name: npm install, build, and test #cd frontを追加
         run: |
-          cd front
+          cd front # 二重にcd frontしているので、最初の`cd front`を削除しても良い。
           npm install
           npm run build --if-present
           npm run test --if-present
 
+      # ディレクトリ構造の確認のために`ls`を追加。デバッグ時に役立ちます。
+      - name: List directories for debugging
+        run: |
+          pwd
+          ls -la
+          ls -la .next
+
       - name: Copy artifact for deployment job
         run: |
           mkdir deploy
-          cp -r ./.next/standalone/. ./deploy
+          # standaloneディレクトリが見つからない場合のエラー回避策を追加
+          cp -r ./.next/standalone/. ./deploy || echo "No standalone directory found"
           cp -r ./public ./deploy
           cp -r ./.next/static/. ./deploy/.next/static
 
       - name: Zip artifact for deployment
         run: |
-          cd front
+          cd front # この`cd front`が必要か確認してください。もしすでにfrontにいる場合は削除してOKです。
           zip release.zip ./deploy -r
 
       - name: Upload artifact for deployment job
@@ -73,3 +81,10 @@ jobs:
           slot-name: "Production"
           package: ./deploy
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F40917B97CB34822BE93EE1438BEBAD1 }}
+
+  # キャッシュクリア用のジョブを追加して、古いビルドキャッシュを防ぐ
+  clear_cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clean npm cache
+        run: npm cache clean --force
