@@ -16,19 +16,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Change directory to 'front' #追加
+        run: cd front #追加
+
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: "20.x"
 
-      - name: npm install, build, and test
+      - name: npm install, build, and test #cd frontを追加
         run: |
+          cd front
           npm install
           npm run build --if-present
           npm run test --if-present
 
+      - name: Copy artifact for deployment job
+        run: |
+          mkdir deploy
+          cp -r ./.next/standalone/. ./deploy
+          cp -r ./public ./deploy
+          cp -r ./.next/static/. ./deploy/.next/static
+
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+          cd front
+          zip release.zip ./deploy -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -58,5 +71,5 @@ jobs:
         with:
           app-name: "tech0-gen-7-step4-studentwebapp-pos-39"
           slot-name: "Production"
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_59974EB4C8F147609EBA654B78DB6CC0 }}
+          package: ./deploy
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F40917B97CB34822BE93EE1438BEBAD1 }}
